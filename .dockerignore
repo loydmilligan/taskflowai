@@ -1,0 +1,31 @@
+# Git files
+.git
+.gitignore
+
+# Development files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Node modules (if any)
+node_modules
+npm-debug.log
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db

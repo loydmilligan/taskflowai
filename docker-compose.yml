@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  taskflow-ai:
+    build: .
+    container_name: taskflow-ai
+    ports:
+      - "8080:80"
+    volumes:
+      # Persist SQLite database
+      - ./data:/var/www/html/data
+      # Persist uploads (for future file attachments)
+      - ./uploads:/var/www/html/uploads
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+    restart: unless-stopped
+    networks:
+      - taskflow-network
+
+networks:
+  taskflow-network:
+    driver: bridge
+
+# Optional: Add volumes for persistent data
+volumes:
+  taskflow-data:
+    driver: local
+  taskflow-uploads:
+    driver: local

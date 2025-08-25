@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a73e8">
+    <title>TaskFlow AI</title>
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Color System */
+            --primary-500: #1a73e8;
+            --primary-600: #1557b0;
+            --primary-50: #e8f0fe;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --green-500: #10b981;
+            --red-500: #ef4444;
+            --orange-500: #f97316;
+            
+            /* Spacing Scale */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            
+            /* Typography */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            
+            /* Layout */
+            --header-height: 64px;
+            --nav-height: 80px;
+            --chat-input-height: 60px;
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            
+            /* Touch Targets */
+            --touch-target: 44px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* Layout Structure */
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: -webkit-fill-available;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--space-4);
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--gray-900);
+            flex: 1;
+        }
+
+        .header-action {
+            background: none;
+            border: none;
+            width: var(--touch-target);
+            height: var(--touch-target);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .header-action:hover,
+        .header-action:active {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+
+        /* Main Content Area */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .view {
+            flex: 1;
+            padding: var(--space-4);
+            overflow-y: auto;
+            display: none;
+        }
+
+        .view.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .chat-container.active {
+            display: flex;
+        }
+
+        .chat-header {
+            background: var(--primary-500);
+            color: white;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--space-4);
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            width: var(--touch-target);
+            height: var(--touch-target);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: var(--space-3);
+        }
+
+        .chat-title {
+            font-size: var(--text-lg);
+            font-weight: 500;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-4);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .message {
+            max-width: 85%;
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--border-radius);
+            font-size: var(--text-sm);
+            line-height: 1.4;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--primary-500);
+            color: white;
+            border-bottom-right-radius: var(--border-radius-sm);
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background: var(--gray-100);
+            color: var(--gray-900);
+            border-bottom-left-radius: var(--border-radius-sm);
+        }
+
+        .chat-input-container {
+            background: white;
+            border-top: 1px solid var(--gray-200);
+            padding: var(--space-4);
+            display: flex;
+            gap: var(--space-3);
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            padding: var(--space-3);
+            font-size: var(--text-base);
+            resize: none;
+            min-height: var(--touch-target);
+            max-height: 120px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-500);
+        }
+
+        .chat-send {
+            background: var(--primary-500);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: var(--touch-target);
+            height: var(--touch-target);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chat-send:hover:not(:disabled) {
+            background: var(--primary-600);
+        }
+
+        .chat-send:disabled {
+            background: var(--gray-300);
+            cursor: not-allowed;
+        }
+
+        /* Floating Chat Button */
+        .chat-fab {
+            position: fixed;
+            bottom: calc(var(--nav-height) + var(--space-4));
+            right: var(--space-4);
+            width: 56px;
+            height: 56px;
+            background: var(--primary-500);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+            transition: all 0.3s ease;
+            z-index: 200;
+        }
+
+        .chat-fab:hover {
+            background: var(--primary-600);
+            transform: scale(1.1);
+        }
+
+        /* Card Components */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: var(--gray-300);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-3);
+        }
+
+        .card-title {
+            font-size: var(--text-base);
+            font-weight: 600;
+            color: var(--gray-900);
+            flex: 1;
+        }
+
+        .card-content {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            line-height: 1.4;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-top: var(--space-3);
+            font-size: var(--text-xs);
+            color: var(--gray-500);
+        }
+
+        /* Priority Indicators */
+        .priority-high {
+            background: var(--red-500);
+            color: white;
+            padding: 2px var(--space-2);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--text-xs);
+            font-weight: 500;
+        }
+
+        .priority-medium {
+            background: var(--orange-500);
+            color: white;
+            padding: 2px var(--space-2);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--text-xs);
+            font-weight: 500;
+        }
+
+        .priority-low {
+            background: var(--gray-400);
+            color: white;
+            padding: 2px var(--space-2);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--text-xs);
+            font-weight: 500;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-16) var(--space-4);
+            color: var(--gray-500);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-4);
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+            color: var(--gray-700);
+        }
+
+        .empty-state-description {
+            font-size: var(--text-sm);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            background: white;
+            border-top: 1px solid var(--gray-200);
+            height: var(--nav-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: var(--space-2) 0;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-1);
+            padding: var(--space-2);
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--gray-600);
+            font-size: var(--text-xs);
+            font-weight: 500;
+            min-width: var(--touch-target);
+        }
+
+        .nav-item.active {
+            color: var(--primary-500);
+            background: var(--primary-50);
+        }
+
+        .nav-item:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-item.active:hover {
+            background: var(--primary-50);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--gray-200);
+            border-top-color: var(--primary-500);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-1);
+            font-weight: 500;
+            color: var(--gray-700);
+            font-size: var(--text-sm);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: var(--space-3);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--text-base);
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-500);
+        }
+
+        .btn-primary {
+            background: var(--primary-500);
+            color: white;
+            padding: var(--space-3) var(--space-6);
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: var(--text-base);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: var(--touch-target);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-600);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .app {
+                max-width: 768px;
+                margin: 0 auto;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+            
+            .chat-fab {
+                display: none;
+            }
+        }
+
+        /* Dark Mode Support (for future) */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --gray-50: #111827;
+                --gray-100: #1f2937;
+                --gray-200: #374151;
+                --gray-300: #4b5563;
+                --gray-900: #f9fafb;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Touch Improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .card:hover {
+                border-color: var(--gray-200);
+                box-shadow: none;
+            }
+            
+            .nav-item:hover {
+                background: transparent;
+            }
+            
+            .nav-item.active:hover {
+                background: var(--primary-50);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="header-title">TaskFlow AI</h1>
+            <button class="header-action" onclick="openSettings()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Scratchpad View -->
+            <div id="scratchpad" class="view active">
+                <div id="scraps-container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading scraps...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plan View -->
+            <div id="plan" class="view">
+                <div id="plan-container">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📅</div>
+                        <h2 class="empty-state-title">Today's Plan</h2>
+                        <p class="empty-state-description">Ask AI to help you plan your day</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects View -->
+            <div id="projects" class="view">
+                <div id="projects-container">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h2 class="empty-state-title">No Projects Yet</h2>
+                        <p class="empty-state-description">Start a conversation to create your first project</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks View -->
+            <div id="tasks" class="view">
+                <div id="tasks-container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading tasks...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes View -->
+            <div id="notes" class="view">
+                <div id="notes-container">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <h2 class="empty-state-title">No Notes Yet</h2>
+                        <p class="empty-state-description">Create notes through conversation with AI</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div id="calendar" class="view">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📆</div>
+                    <h2 class="empty-state-title">Calendar</h2>
+                    <p class="empty-state-description">View your scheduled tasks and deadlines</p>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="settings" class="view">
+                <form id="settings-form" method="POST" action="/settings">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">App Settings</h3>
+                        </div>
+                        <div class="form-group">
+                            <label for="app_name">App Name</label>
+                            <input type="text" id="app_name" name="app_name" class="form-control" value="TaskFlow AI">
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">AI Configuration</h3>
+                        </div>
+                        <div class="form-group">
+                            <label for="gemini_api_key">Google Gemini API Key</label>
+                            <input type="password" id="gemini_api_key" name="gemini_api_key" class="form-control">
+                            <small style="color: var(--gray-500); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">Required for AI chat functionality</small>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Notifications</h3>
+                        </div>
+                        <div class="form-group">
+                            <label for="ntfy_topic">ntfy.sh Topic (optional)</label>
+                            <input type="text" id="ntfy_topic" name="ntfy_topic" class="form-control">
+                            <small style="color: var(--gray-500); font-size: var(--text-xs); margin-top: var(--space-1); display: block;">For push notifications and reminders</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="timezone">Timezone</label>
+                            <select id="timezone" name="timezone" class="form-control">
+                                <option value="UTC">UTC</option>
+                                <option value="America/New_York">Eastern Time</option>
+                                <option value="America/Chicago">Central Time</option>
+                                <option value="America/Denver">Mountain Time</option>
+                                <option value="America/Los_Angeles">Pacific Time</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Save Settings</button>
+                </form>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" data-view="scratchpad">
+                <div class="nav-icon">📝</div>
+                <span>Scraps</span>
+            </div>
+            <div class="nav-item" data-view="plan">
+                <div class="nav-icon">📋</div>
+                <span>Plan</span>
+            </div>
+            <div class="nav-item" data-view="projects">
+                <div class="nav-icon">🗂️</div>
+                <span>Projects</span>
+            </div>
+            <div class="nav-item" data-view="tasks">
+                <div class="nav-icon">✓</div>
+                <span>Tasks</span>
+            </div>
+            <div class="nav-item" data-view="notes">
+                <div class="nav-icon">📄</div>
+                <span>Notes</span>
+            </div>
+            <div class="nav-item" data-view="calendar">
+                <div class="nav-icon">📅</div>
+                <span>Calendar</span>
+            </div>
+        </nav>
+
+        <!-- Floating Chat Button -->
+        <button class="chat-fab" onclick="toggleChat()">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Chat Interface Overlay -->
+    <div id="chat" class="chat-container">
+        <div class="chat-header">
+            <button class="chat-close" onclick="toggleChat()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+            </button>
+            <h2 class="chat-title">AI Assistant</h2>
+        </div>
+        
+        <div id="chat-messages" class="chat-messages">
+            <div class="message ai">
+                <p>Hi! I'm your TaskFlow AI assistant. I can help you manage tasks, create projects, organize notes, and plan your day. What would you like to work on?</p>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <textarea 
+                id="chat-input" 
+                class="chat-input" 
+                placeholder="Type your message..." 
+                rows="1"
+                maxlength="500"
+            ></textarea>
+            <button id="chat-send" class="chat-send" onclick="sendMessage()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        const AppState = {
+            currentView: 'scratchpad',
+            chatOpen: false,
+            loading: {
+                scraps: false,
+                tasks: false,
+                chat: false
+            },
+            data: {
+                scraps: [],
+                tasks: [],
+                chatHistory: []
+            }
+        };
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            loadInitialData();
+        });
+
+        function initializeApp() {
+            // Set up touch event handling for better mobile experience
+            document.addEventListener('touchstart', function() {}, { passive: true });
+            
+            // Auto-resize chat input
+            const chatInput = document.getElementById('chat-input');
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+            
+            // Handle Enter key in chat
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            // Bottom navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const viewName = this.dataset.view;
+                    switchView(viewName);
+                });
+            });
+
+            // Swipe gesture support for view switching
+            let touchStartX = 0;
+            let touchStartY = 0;
+            
+            document.addEventListener('touchstart', function(e) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            document.addEventListener('touchmove', function(e) {
+                if (!touchStartX || !touchStartY) return;
+                
+                const touchEndX = e.touches[0].clientX;
+                const touchEndY = e.touches[0].clientY;
+                const diffX = touchStartX - touchEndX;
+                const diffY = touchStartY - touchEndY;
+                
+                // Only handle horizontal swipes
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                    // Prevent scrolling during swipe
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            document.addEventListener('touchend', function(e) {
+                if (!touchStartX || !touchStartY) return;
+                
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                const diffX = touchStartX - touchEndX;
+                const diffY = touchStartY - touchEndY;
+                
+                // Only handle horizontal swipes that are significant
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 80) {
+                    const views = ['scratchpad', 'plan', 'projects', 'tasks', 'notes', 'calendar'];
+                    const currentIndex = views.indexOf(AppState.currentView);
+                    
+                    if (diffX > 0 && currentIndex < views.length - 1) {
+                        // Swipe left - next view
+                        switchView(views[currentIndex + 1]);
+                    } else if (diffX < 0 && currentIndex > 0) {
+                        // Swipe right - previous view
+                        switchView(views[currentIndex - 1]);
+                    }
+                }
+                
+                touchStartX = 0;
+                touchStartY = 0;
+            }, { passive: true });
+        }
+
+        function switchView(viewName) {
+            // Hide all views
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // Show selected view
+            document.getElementById(viewName).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-view="${viewName}"]`).classList.add('active');
+            
+            // Update app state
+            AppState.currentView = viewName;
+            
+            // Update header title
+            const titles = {
+                scratchpad: 'Scratchpad',
+                plan: 'Today\'s Plan',
+                projects: 'Projects',
+                tasks: 'Tasks',
+                notes: 'Notes',
+                calendar: 'Calendar',
+                settings: 'Settings'
+            };
+            document.querySelector('.header-title').textContent = titles[viewName] || 'TaskFlow AI';
+            
+            // Load view-specific data
+            loadViewData(viewName);
+        }
+
+        function toggleChat() {
+            const chatContainer = document.getElementById('chat');
+            AppState.chatOpen = !AppState.chatOpen;
+            
+            if (AppState.chatOpen) {
+                chatContainer.classList.add('active');
+                document.getElementById('chat-input').focus();
+            } else {
+                chatContainer.classList.remove('active');
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Clear input and disable send button
+            input.value = '';
+            input.style.height = 'auto';
+            document.getElementById('chat-send').disabled = true;
+            
+            // Add user message to chat
+            addMessageToChat('user', message);
+            
+            // Show loading state
+            const loadingMessage = addMessageToChat('ai', '<div class="loading"><div class="spinner"></div>Thinking...</div>');
+            
+            try {
+                // Call API
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        context: AppState.data.chatHistory.slice(-5) // Last 5 messages for context
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove loading message
+                loadingMessage.remove();
+                
+                if (data.success) {
+                    // Add AI response
+                    addMessageToChat('ai', data.response);
+                    
+                    // Handle any actions from AI response
+                    if (data.actions && data.actions.length > 0) {
+                        handleAIActions(data.actions);
+                    }
+                    
+                    // Store in chat history
+                    AppState.data.chatHistory.push(
+                        { type: 'user', message: message, timestamp: new Date() },
+                        { type: 'ai', message: data.response, timestamp: new Date() }
+                    );
+                } else {
+                    addMessageToChat('ai', 'Sorry, I encountered an error. Please try again.');
+                }
+                
+            } catch (error) {
+                console.error('Chat error:', error);
+                loadingMessage.innerHTML = '<p>Sorry, I encountered an error. Please try again.</p>';
+            }
+            
+            // Re-enable send button
+            document.getElementById('chat-send').disabled = false;
+        }
+
+        function addMessageToChat(type, content) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = `<p>${content}</p>`;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function handleAIActions(actions) {
+            // Handle AI-directed actions like navigation, data creation, etc.
+            actions.forEach(action => {
+                switch (action.type) {
+                    case 'navigate':
+                        switchView(action.view);
+                        break;
+                    case 'create_task':
+                        // Refresh tasks view
+                        if (AppState.currentView === 'tasks') {
+                            loadViewData('tasks');
+                        }
+                        break;
+                    case 'refresh_view':
+                        loadViewData(AppState.currentView);
+                        break;
+                }
+            });
+        }
+
+        async function loadInitialData() {
+            // Load scraps and tasks by default
+            await Promise.all([
+                loadViewData('scratchpad'),
+                loadViewData('tasks')
+            ]);
+        }
+
+        async function loadViewData(viewName) {
+            switch (viewName) {
+                case 'scratchpad':
+                    await loadScraps();
+                    break;
+                case 'tasks':
+                    await loadTasks();
+                    break;
+                case 'projects':
+                    await loadProjects();
+                    break;
+                case 'notes':
+                    await loadNotes();
+                    break;
+                case 'plan':
+                    await loadPlan();
+                    break;
+                // Settings view doesn't need data loading
+            }
+        }
+
+        async function loadScraps() {
+            const container = document.getElementById('scraps-container');
+            
+            try {
+                const response = await fetch('/api/scraps');
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    container.innerHTML = '';
+                    data.data.forEach(scrap => {
+                        const scrapElement = createScrapElement(scrap);
+                        container.appendChild(scrapElement);
+                    });
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🗒️</div>
+                            <h2 class="empty-state-title">No Scraps Yet</h2>
+                            <p class="empty-state-description">Start chatting with AI to capture quick thoughts and ideas</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading scraps:', error);
+                container.innerHTML = '<p style="color: var(--red-500); text-align: center; padding: var(--space-8);">Error loading scraps. Please try again.</p>';
+            }
+        }
+
+        async function loadTasks() {
+            const container = document.getElementById('tasks-container');
+            
+            try {
+                const response = await fetch('/api/tasks');
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    container.innerHTML = '';
+                    data.data.forEach(task => {
+                        const taskElement = createTaskElement(task);
+                        container.appendChild(taskElement);
+                    });
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <h2 class="empty-state-title">No Tasks Yet</h2>
+                            <p class="empty-state-description">Ask AI to help you create and organize your tasks</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                container.innerHTML = '<p style="color: var(--red-500); text-align: center; padding: var(--space-8);">Error loading tasks. Please try again.</p>';
+            }
+        }
+
+        async function loadProjects() {
+            const container = document.getElementById('projects-container');
+            
+            try {
+                const response = await fetch('/api/projects');
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    container.innerHTML = '';
+                    data.data.forEach(project => {
+                        const projectElement = createProjectElement(project);
+                        container.appendChild(projectElement);
+                    });
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <h2 class="empty-state-title">No Projects Yet</h2>
+                            <p class="empty-state-description">Start a conversation to create your first project</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                container.innerHTML = '<p style="color: var(--red-500); text-align: center; padding: var(--space-8);">Error loading projects. Please try again.</p>';
+            }
+        }
+
+        async function loadNotes() {
+            const container = document.getElementById('notes-container');
+            
+            try {
+                const response = await fetch('/api/notes');
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    container.innerHTML = '';
+                    data.data.forEach(note => {
+                        const noteElement = createNoteElement(note);
+                        container.appendChild(noteElement);
+                    });
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <h2 class="empty-state-title">No Notes Yet</h2>
+                            <p class="empty-state-description">Create notes through conversation with AI</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading notes:', error);
+                container.innerHTML = '<p style="color: var(--red-500); text-align: center; padding: var(--space-8);">Error loading notes. Please try again.</p>';
+            }
+        }
+
+        async function loadPlan() {
+            const container = document.getElementById('plan-container');
+            
+            try {
+                const response = await fetch('/api/plan');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    // Show today's plan
+                    container.innerHTML = `
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Today's Focus</h3>
+                            </div>
+                            <div class="card-content">
+                                ${data.data.summary || 'No plan set for today. Ask AI to help you plan your day!'}
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add tasks for today if any
+                    if (data.data.tasks && data.data.tasks.length > 0) {
+                        data.data.tasks.forEach(task => {
+                            const taskElement = createTaskElement(task);
+                            container.appendChild(taskElement);
+                        });
+                    }
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📅</div>
+                            <h2 class="empty-state-title">Today's Plan</h2>
+                            <p class="empty-state-description">Ask AI to help you plan your day</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading plan:', error);
+                container.innerHTML = '<p style="color: var(--red-500); text-align: center; padding: var(--space-8);">Error loading plan. Please try again.</p>';
+            }
+        }
+
+        function createScrapElement(scrap) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <div class="card-content">
+                    ${scrap.content || scrap.text || ''}
+                </div>
+                <div class="card-meta">
+                    <span>📅 ${formatDate(scrap.created_at)}</span>
+                </div>
+            `;
+            return div;
+        }
+
+        function createTaskElement(task) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${task.title || task.name || ''}</h3>
+                    <span class="priority-${task.priority || 'medium'}">${task.priority || 'medium'}</span>
+                </div>
+                ${task.description ? `<div class="card-content">${task.description}</div>` : ''}
+                <div class="card-meta">
+                    ${task.due_date ? `<span>📅 Due: ${formatDate(task.due_date)}</span>` : ''}
+                    ${task.status ? `<span>Status: ${task.status}</span>` : ''}
+                </div>
+            `;
+            return div;
+        }
+
+        function createProjectElement(project) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${project.name || project.title || ''}</h3>
+                </div>
+                ${project.description ? `<div class="card-content">${project.description}</div>` : ''}
+                <div class="card-meta">
+                    <span>📅 ${formatDate(project.created_at)}</span>
+                    ${project.status ? `<span>Status: ${project.status}</span>` : ''}
+                </div>
+            `;
+            return div;
+        }
+
+        function createNoteElement(note) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${note.title || 'Untitled Note'}</h3>
+                </div>
+                <div class="card-content">
+                    ${(note.content || '').substring(0, 200)}${note.content && note.content.length > 200 ? '...' : ''}
+                </div>
+                <div class="card-meta">
+                    <span>📅 ${formatDate(note.created_at)}</span>
+                </div>
+            `;
+            return div;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            
+            const date = new Date(dateString);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            if (date.toDateString() === today.toDateString()) {
+                return 'Today';
+            } else if (date.toDateString() === tomorrow.toDateString()) {
+                return 'Tomorrow';
+            } else {
+                return date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            }
+        }
+
+        function openSettings() {
+            switchView('settings');
+        }
+
+        // Service Worker Registration (for PWA features)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(function(error) {
+                console.log('ServiceWorker registration failed: ', error);
+            });
+        }
+    </script>
+</body>
+</html>

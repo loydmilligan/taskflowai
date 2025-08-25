@@ -1,0 +1,25 @@
+# Development version with volume mounting for live editing
+version: '3.8'
+
+services:
+  taskflow-ai-dev:
+    build: .
+    container_name: taskflow-ai-dev
+    ports:
+      - "8080:80"
+    volumes:
+      # Mount source code for development
+      - .:/var/www/html
+      # Persist data
+      - ./data:/var/www/html/data
+      - ./uploads:/var/www/html/uploads
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+      - PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d:/usr/local/etc/php/conf.d/dev
+    restart: unless-stopped
+    networks:
+      - taskflow-dev-network
+
+networks:
+  taskflow-dev-network:
+    driver: bridge
