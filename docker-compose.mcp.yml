@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  taskflow-ai:
+    build: .
+    container_name: taskflow-ai
+    ports:
+      - "8080:80"
+    volumes:
+      # Persist SQLite database
+      - ./data:/var/www/html/data
+      # Persist uploads (for future file attachments)
+      - ./uploads:/var/www/html/uploads
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+    restart: unless-stopped
+    networks:
+      - taskflow-network
+
+  taskflow-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    container_name: taskflow-mcp
+    depends_on:
+      - taskflow-ai
+    environment:
+      - TASKFLOW_BASE_URL=http://taskflow-ai
+      - TASKFLOW_API_KEY=${TASKFLOW_API_KEY}
+    volumes:
+      - ./mcp-server.js:/app/mcp-server.js:ro
+      - ./package.json:/app/package.json:ro
+    restart: unless-stopped
+    networks:
+      - taskflow-network
+    # The MCP server runs on stdio, not a network port
+    # It will be accessed via docker exec or external process
+
+networks:
+  taskflow-network:
+    driver: bridge
+
+# Optional: Add volumes for persistent data
+volumes:
+  taskflow-data:
+    driver: local
+  taskflow-uploads:
+    driver: local

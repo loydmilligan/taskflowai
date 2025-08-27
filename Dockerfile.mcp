@@ -1,0 +1,31 @@
+# MCP Server Dockerfile for TaskFlow AI
+FROM node:20-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies for running the MCP server
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy package files
+COPY package.json ./
+
+# Install npm dependencies
+RUN npm install
+
+# Copy MCP server source
+COPY mcp-server.js ./
+
+# Make the MCP server executable
+RUN chmod +x mcp-server.js
+
+# Create a non-root user
+RUN groupadd -r mcpuser && useradd -r -g mcpuser mcpuser
+RUN chown -R mcpuser:mcpuser /app
+USER mcpuser
+
+# The MCP server runs on stdio and waits for input
+# It's designed to be started by an external process
+CMD ["node", "mcp-server.js"]

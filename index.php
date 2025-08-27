@@ -4,9 +4,10 @@
  * Chat-driven interface powered by Google Gemini AI
  */
 
-// Error reporting for development
+// Error reporting for development - log errors but don't display them in API responses
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
 // CORS headers for API access
 header('Access-Control-Allow-Origin: *');

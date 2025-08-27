@@ -40,3 +40,14 @@ uploads/*
 # Data directory for Docker volumes
 data/
 !data/.gitkeep
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# MCP Server runtime files
+*.pid

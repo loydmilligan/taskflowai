@@ -16,6 +16,7 @@ WORKDIR /var/www/html
 
 # Copy application files
 COPY index.php .
+COPY .htaccess .
 COPY CLAUDE.md .
 COPY README.md .
 
@@ -27,6 +28,9 @@ RUN mkdir -p data && chown -R www-data:www-data data
 
 # Ensure proper permissions for Apache
 RUN chown -R www-data:www-data /var/www/html
+
+# Configure Apache to allow .htaccess overrides
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # Configure Apache to serve from /var/www/html
 RUN sed -i 's!/var/www/html!/var/www/html!g' /etc/apache2/sites-available/000-default.conf
