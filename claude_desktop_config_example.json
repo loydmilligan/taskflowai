@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "taskflow-ai": {
+      "command": "node",
+      "args": ["/home/mmariani/Projects/taskflowAI/mcp-server-standalone.js"],
+      "env": {
+        "TASKFLOW_BASE_URL": "http://192.168.5.128:8080",
+        "TASKFLOW_API_KEY": "taskflow_539bb7ab05e67de83e114ba70e68f60e"
+      }
+    }
+  }
+}
