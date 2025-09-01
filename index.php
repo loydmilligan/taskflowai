@@ -2168,9 +2168,9 @@ class Router {
         
         <div id="today-view" class="view active">
             <div class="card">
-                <h2>Today\'s Plan</h2>
+                <h2>Today's Plan</h2>
                 <div id="today-content">
-                    <div class="empty-state">Loading today\'s tasks...</div>
+                    <div class="empty-state">Loading today's tasks...</div>
                 </div>
             </div>
         </div>
@@ -2525,7 +2525,7 @@ class Router {
             const project = task.project_name ? `📁 ${task.project_name}` : "";
             
             return `
-                <div class="task-item ${priorityClass} ${statusClass}" onclick="openDetailModal(${JSON.stringify(task).replace(/\"/g, \'&quot;\')}, \"task\")" style="cursor: pointer;">
+                <div class="task-item ${priorityClass} ${statusClass}" onclick="openDetailModal(${JSON.stringify(task).replace(/\"/g, '&quot;')}, \"task\")" style="cursor: pointer;">
                     <div class="item-title">${task.title}</div>
                     ${task.description ? `<div style="margin: 4px 0; color: #6b7280; font-size: 14px;">${task.description}</div>` : ""}
                     <div class="item-meta">
@@ -2556,7 +2556,7 @@ class Router {
             let html = "";
             projects.forEach(project => {
                 html += `
-                    <div class="project-item" onclick="openDetailModal(${JSON.stringify(project).replace(/\"/g, \'&quot;\')}, \"project\")" style="cursor: pointer;">
+                    <div class="project-item" onclick="openDetailModal(${JSON.stringify(project).replace(/\"/g, '&quot;')}, \"project\")" style="cursor: pointer;">
                         <div class="item-title">${project.name}</div>
                         ${project.description ? `<div style="margin: 4px 0; color: #6b7280; font-size: 14px;">${project.description}</div>` : ""}
                         <div class="item-meta">
@@ -2588,7 +2588,7 @@ class Router {
             notes.forEach(note => {
                 const dateAssigned = note.date_assigned ? new Date(note.date_assigned).toLocaleDateString() : "";
                 html += `
-                    <div class="note-item" onclick="openDetailModal(${JSON.stringify(note).replace(/\"/g, \'&quot;\')}, \"note\")" style="cursor: pointer;">
+                    <div class="note-item" onclick="openDetailModal(${JSON.stringify(note).replace(/\"/g, '&quot;')}, \"note\")" style="cursor: pointer;">
                         <div class="item-title">${note.title}</div>
                         <div style="margin: 8px 0; color: #374151; font-size: 14px; line-height: 1.4;">${note.content.substring(0, 200)}${note.content.length > 200 ? "..." : ""}</div>
                         <div class="item-meta">
@@ -2617,7 +2617,7 @@ class Router {
                 const processedText = scrap.processed ? "✓ Processed" : "📝 Raw";
                 
                 html += `
-                    <div class="scrap-item ${processedClass}" onclick="openDetailModal(${JSON.stringify(scrap).replace(/\"/g, \'&quot;\')}, \"scrap\")" style="cursor: pointer;">
+                    <div class="scrap-item ${processedClass}" onclick="openDetailModal(${JSON.stringify(scrap).replace(/\"/g, '&quot;')}, \"scrap\")" style="cursor: pointer;">
                         <div style="margin-bottom: 8px; color: #374151; font-size: 14px; line-height: 1.4;">${scrap.content}</div>
                         <div class="item-meta">
                             <span class="status ${processedClass}">${processedText}</span>
