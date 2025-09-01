@@ -1417,13 +1417,12 @@ class Router {
         // Get API key for frontend
         $defaultApiKey = $settings['default_api_key'] ?? '';
         
-        ?>
-<!DOCTYPE html>
+        echo '<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($appName); ?></title>
+    <title>' . htmlspecialchars($appName) . '</title>
     <style>
         * {
             margin: 0;
@@ -2153,7 +2152,7 @@ class Router {
 <body>
     <div class="container">
         <div class="header">
-            <h1><?php echo htmlspecialchars($appName); ?></h1>
+            <h1>' . htmlspecialchars($appName) . '</h1>
             <p>AI-powered task management through natural conversation</p>
         </div>
         
@@ -2314,7 +2313,7 @@ class Router {
                     
                     <div class="form-group">
                         <label class="form-label">App Name</label>
-                        <input type="text" id="app-name" class="form-input" value="<?php echo htmlspecialchars($appName); ?>">
+                        <input type="text" id="app-name" class="form-input" value="' . htmlspecialchars($appName) . '">
                     </div>
                     
                     <div class="form-group">
@@ -2349,7 +2348,7 @@ class Router {
                     
                     <div class="form-group">
                         <label class="form-label">API Key for External Access</label>
-                        <input type="text" class="form-input" value="<?php echo htmlspecialchars($defaultApiKey); ?>" readonly>
+                        <input type="text" class="form-input" value="' . htmlspecialchars($defaultApiKey) . '" readonly>
                         <small style="color: #6b7280;">Use this key for API access</small>
                     </div>
                     
@@ -2386,7 +2385,7 @@ class Router {
     </div>
     
     <script>
-        const API_KEY = "<?php echo htmlspecialchars($defaultApiKey); ?>";
+        const API_KEY = "' . htmlspecialchars($defaultApiKey) . '";
         const API_BASE = "/api";
         
         let currentView = "today";
@@ -2800,7 +2799,7 @@ class Router {
                     // Clear and rebuild options
                     select.innerHTML = "<option value=\"\">All Areas</option>";
                     sortedAreas.forEach(area => {
-                        const option = document.createElement('option');
+                        const option = document.createElement("option");
                         option.value = area;
                         option.textContent = area.charAt(0).toUpperCase() + area.slice(1);
                         select.appendChild(option);
@@ -2815,13 +2814,13 @@ class Router {
         function applyFilters(type) {
             let data, renderFunc;
             
-            if (type === 'tasks') {
+            if (type === "tasks") {
                 data = [...allTasks];
                 renderFunc = renderTasks;
-            } else if (type === 'projects') {
+            } else if (type === "projects") {
                 data = [...allProjects];
                 renderFunc = renderProjects;
-            } else if (type === 'notes') {
+            } else if (type === "notes") {
                 data = [...allNotes];
                 renderFunc = renderNotes;
             } else {
@@ -2835,7 +2834,7 @@ class Router {
             }
             
             // Apply type-specific filters
-            if (type === 'tasks') {
+            if (type === "tasks") {
                 const statusFilter = document.getElementById(`${type}-status-filter`)?.value;
                 const priorityFilter = document.getElementById(`${type}-priority-filter`)?.value;
                 
@@ -2845,12 +2844,12 @@ class Router {
                 if (priorityFilter) {
                     data = data.filter(item => item.priority === priorityFilter);
                 }
-            } else if (type === 'projects') {
+            } else if (type === "projects") {
                 const statusFilter = document.getElementById(`${type}-status-filter`)?.value;
                 if (statusFilter) {
                     data = data.filter(item => item.status === statusFilter);
                 }
-            } else if (type === 'notes') {
+            } else if (type === "notes") {
                 const dateFilter = document.getElementById(`${type}-date-filter`)?.value;
                 if (dateFilter) {
                     data = data.filter(item => item.date_assigned === dateFilter);
@@ -3272,8 +3271,7 @@ class Router {
         </div>
     </div>
 </body>
-</html>
-<?php
+</html>';
     }
 }
 

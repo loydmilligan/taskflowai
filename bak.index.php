@@ -1049,7 +1049,7 @@ class NtfyManager {
             $tags[] = 'red_circle';
         }
         
-        return $this->sendNotification($title, $message, 4, $tags, $actions);
+        return $this->sendNotification($title, $message, $tags, 4, $actions);
     }
     
     public function sendMorningReminder($unprocessedScrapsCount = 0, $overdueTasksCount = 0, $todayTasksCount = 0) {
@@ -1221,12 +1221,6 @@ class Router {
                 if ($method === 'POST') {
                     $scrapId = $matches[1];
                     $data = json_decode(file_get_contents('php://input'), true);
-                    if ($data === null) {
-                        throw new Exception('Invalid JSON input');
-                    }
-                    if (!isset($data['to']) || !isset($data['data'])) {
-                        throw new Exception('Missing conversion parameters');
-                    }
                     
                     if ($data['to'] === 'task') {
                         $result = $this->scraps->convertToTask($scrapId, $data['data']);
@@ -1236,15 +1230,6 @@ class Router {
                         throw new Exception('Invalid conversion type');
                     }
                     
-                    echo json_encode($result);
-                }
-            } elseif (preg_match('#^/api/scraps/(\d+)/?$#', $uri, $matches)) {
-                $id = $matches[1];
-                if ($method === 'GET') {
-                    $scrap = $this->scraps->getById($id);
-                    echo json_encode($scrap ?: ['error' => 'Scrap not found']);
-                } elseif ($method === 'DELETE') {
-                    $result = $this->scraps->delete($id);
                     echo json_encode($result);
                 }
             }
@@ -1333,21 +1318,6 @@ class Router {
                 } else {
                     echo json_encode(['success' => false, 'error' => 'task_id required']);
                 }
-            } elseif ($uri === '/api/ntfy/send-due-task-reminders' && $method === 'POST') {
-                $tasks = $this->tasks->getAll();
-                $remindersSent = 0;
-                foreach ($tasks as $task) {
-                    if ($task['due_date']) {
-                        $dueDate = new DateTime($task['due_date']);
-                        $now = new DateTime();
-                        $interval = $now->diff($dueDate);
-                        if ($interval->days <= 1 && !$interval->invert) {
-                            $this->ntfy->sendTaskReminder($task);
-                            $remindersSent++;
-                        }
-                    }
-                }
-                echo json_encode(['success' => true, 'reminders_sent' => $remindersSent]);
             }
             
             else {
@@ -1417,13 +1387,12 @@ class Router {
         // Get API key for frontend
         $defaultApiKey = $settings['default_api_key'] ?? '';
         
-        ?>
-<!DOCTYPE html>
+        echo '<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($appName); ?></title>
+    <title>' . htmlspecialchars($appName) . '</title>
     <style>
         * {
             margin: 0;
@@ -2153,7 +2122,7 @@ class Router {
 <body>
     <div class="container">
         <div class="header">
-            <h1><?php echo htmlspecialchars($appName); ?></h1>
+            <h1>' . htmlspecialchars($appName) . '</h1>
             <p>AI-powered task management through natural conversation</p>
         </div>
         
@@ -2191,13 +2160,13 @@ class Router {
                 <div class="filter-controls">
                     <div class="filter-group">
                         <label class="filter-label">Area</label>
-                        <select id="tasks-area-filter" class="filter-select" onchange="applyFilters(&quot;tasks&quot;)">
+                        <select id="tasks-area-filter" class="filter-select" onchange="applyFilters('tasks')">
                             <option value="">All Areas</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Status</label>
-                        <select id="tasks-status-filter" class="filter-select" onchange="applyFilters(&quot;tasks&quot;)">
+                        <select id="tasks-status-filter" class="filter-select" onchange="applyFilters('tasks')">
                             <option value="">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="in_progress">In Progress</option>
@@ -2206,7 +2175,7 @@ class Router {
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Priority</label>
-                        <select id="tasks-priority-filter" class="filter-select" onchange="applyFilters(&quot;tasks&quot;)">
+                        <select id="tasks-priority-filter" class="filter-select" onchange="applyFilters('tasks')">
                             <option value="">All Priority</option>
                             <option value="high">High</option>
                             <option value="medium">Medium</option>
@@ -2215,7 +2184,7 @@ class Router {
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Sort By</label>
-                        <select id="tasks-sort" class="filter-select" onchange="applyFilters(&quot;tasks&quot;)">
+                        <select id="tasks-sort" class="filter-select" onchange="applyFilters('tasks')">
                             <option value="created_at_desc">Newest First</option>
                             <option value="created_at_asc">Oldest First</option>
                             <option value="due_date_asc">Due Date (Earliest)</option>
@@ -2224,7 +2193,7 @@ class Router {
                             <option value="title_asc">Title (A-Z)</option>
                         </select>
                     </div>
-                    <button class="clear-filters" onclick="clearFilters(&quot;tasks&quot;)">Clear Filters</button>
+                    <button class="clear-filters" onclick="clearFilters('tasks')">Clear Filters</button>
                 </div>
                 <div id="tasks-content">
                     <div class="empty-state">Loading tasks...</div>
@@ -2238,13 +2207,13 @@ class Router {
                 <div class="filter-controls">
                     <div class="filter-group">
                         <label class="filter-label">Area</label>
-                        <select id="projects-area-filter" class="filter-select" onchange="applyFilters(&quot;projects&quot;)">
+                        <select id="projects-area-filter" class="filter-select" onchange="applyFilters('projects')">
                             <option value="">All Areas</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Status</label>
-                        <select id="projects-status-filter" class="filter-select" onchange="applyFilters(&quot;projects&quot;)">
+                        <select id="projects-status-filter" class="filter-select" onchange="applyFilters('projects')">
                             <option value="">All Status</option>
                             <option value="active">Active</option>
                             <option value="completed">Completed</option>
@@ -2253,7 +2222,7 @@ class Router {
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Sort By</label>
-                        <select id="projects-sort" class="filter-select" onchange="applyFilters(&quot;projects&quot;)">
+                        <select id="projects-sort" class="filter-select" onchange="applyFilters('projects')">
                             <option value="created_at_desc">Newest First</option>
                             <option value="created_at_asc">Oldest First</option>
                             <option value="name_asc">Name (A-Z)</option>
@@ -2261,7 +2230,7 @@ class Router {
                             <option value="status_asc">Status</option>
                         </select>
                     </div>
-                    <button class="clear-filters" onclick="clearFilters(&quot;projects&quot;)">Clear Filters</button>
+                    <button class="clear-filters" onclick="clearFilters('projects')">Clear Filters</button>
                 </div>
                 <div id="projects-content">
                     <div class="empty-state">Loading projects...</div>
@@ -2275,17 +2244,17 @@ class Router {
                 <div class="filter-controls">
                     <div class="filter-group">
                         <label class="filter-label">Area</label>
-                        <select id="notes-area-filter" class="filter-select" onchange="applyFilters(&quot;notes&quot;)">
+                        <select id="notes-area-filter" class="filter-select" onchange="applyFilters('notes')">
                             <option value="">All Areas</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Date Filter</label>
-                        <input type="date" id="notes-date-filter" class="filter-input" onchange="applyFilters(&quot;notes&quot;)">
+                        <input type="date" id="notes-date-filter" class="filter-input" onchange="applyFilters('notes')">
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Sort By</label>
-                        <select id="notes-sort" class="filter-select" onchange="applyFilters(&quot;notes&quot;)">
+                        <select id="notes-sort" class="filter-select" onchange="applyFilters('notes')">
                             <option value="created_at_desc">Newest First</option>
                             <option value="created_at_asc">Oldest First</option>
                             <option value="date_assigned_desc">Date Assigned (Latest)</option>
@@ -2294,7 +2263,7 @@ class Router {
                             <option value="title_desc">Title (Z-A)</option>
                         </select>
                     </div>
-                    <button class="clear-filters" onclick="clearFilters(&quot;notes&quot;)">Clear Filters</button>
+                    <button class="clear-filters" onclick="clearFilters('notes')">Clear Filters</button>
                 </div>
                 <div id="notes-content">
                     <div class="empty-state">Loading notes...</div>
@@ -2314,7 +2283,7 @@ class Router {
                     
                     <div class="form-group">
                         <label class="form-label">App Name</label>
-                        <input type="text" id="app-name" class="form-input" value="<?php echo htmlspecialchars($appName); ?>">
+                        <input type="text" id="app-name" class="form-input" value="' . htmlspecialchars($appName) . '">
                     </div>
                     
                     <div class="form-group">
@@ -2349,7 +2318,7 @@ class Router {
                     
                     <div class="form-group">
                         <label class="form-label">API Key for External Access</label>
-                        <input type="text" class="form-input" value="<?php echo htmlspecialchars($defaultApiKey); ?>" readonly>
+                        <input type="text" class="form-input" value="' . htmlspecialchars($defaultApiKey) . '" readonly>
                         <small style="color: #6b7280;">Use this key for API access</small>
                     </div>
                     
@@ -2386,7 +2355,7 @@ class Router {
     </div>
     
     <script>
-        const API_KEY = "<?php echo htmlspecialchars($defaultApiKey); ?>";
+        const API_KEY = "' . htmlspecialchars($defaultApiKey) . '";
         const API_BASE = "/api";
         
         let currentView = "today";
@@ -2525,7 +2494,7 @@ class Router {
             const project = task.project_name ? `📁 ${task.project_name}` : "";
             
             return `
-                <div class="task-item ${priorityClass} ${statusClass}" onclick="openDetailModal(${JSON.stringify(task).replace(/\"/g, \'&quot;\')}, \"task\")" style="cursor: pointer;">
+                <div class="task-item ${priorityClass} ${statusClass}" onclick="openDetailModal(${JSON.stringify(task).replace(/"/g, '&quot;')}, 'task')" style="cursor: pointer;">
                     <div class="item-title">${task.title}</div>
                     ${task.description ? `<div style="margin: 4px 0; color: #6b7280; font-size: 14px;">${task.description}</div>` : ""}
                     <div class="item-meta">
@@ -2556,7 +2525,7 @@ class Router {
             let html = "";
             projects.forEach(project => {
                 html += `
-                    <div class="project-item" onclick="openDetailModal(${JSON.stringify(project).replace(/\"/g, \'&quot;\')}, \"project\")" style="cursor: pointer;">
+                    <div class="project-item" onclick="openDetailModal(${JSON.stringify(project).replace(/"/g, '&quot;')}, 'project')" style="cursor: pointer;">
                         <div class="item-title">${project.name}</div>
                         ${project.description ? `<div style="margin: 4px 0; color: #6b7280; font-size: 14px;">${project.description}</div>` : ""}
                         <div class="item-meta">
@@ -2588,7 +2557,7 @@ class Router {
             notes.forEach(note => {
                 const dateAssigned = note.date_assigned ? new Date(note.date_assigned).toLocaleDateString() : "";
                 html += `
-                    <div class="note-item" onclick="openDetailModal(${JSON.stringify(note).replace(/\"/g, \'&quot;\')}, \"note\")" style="cursor: pointer;">
+                    <div class="note-item" onclick="openDetailModal(${JSON.stringify(note).replace(/"/g, '&quot;')}, 'note')" style="cursor: pointer;">
                         <div class="item-title">${note.title}</div>
                         <div style="margin: 8px 0; color: #374151; font-size: 14px; line-height: 1.4;">${note.content.substring(0, 200)}${note.content.length > 200 ? "..." : ""}</div>
                         <div class="item-meta">
@@ -2617,7 +2586,7 @@ class Router {
                 const processedText = scrap.processed ? "✓ Processed" : "📝 Raw";
                 
                 html += `
-                    <div class="scrap-item ${processedClass}" onclick="openDetailModal(${JSON.stringify(scrap).replace(/\"/g, \'&quot;\')}, \"scrap\")" style="cursor: pointer;">
+                    <div class="scrap-item ${processedClass}" onclick="openDetailModal(${JSON.stringify(scrap).replace(/"/g, '&quot;')}, 'scrap')" style="cursor: pointer;">
                         <div style="margin-bottom: 8px; color: #374151; font-size: 14px; line-height: 1.4;">${scrap.content}</div>
                         <div class="item-meta">
                             <span class="status ${processedClass}">${processedText}</span>
@@ -2791,14 +2760,14 @@ class Router {
         function updateAreaFilters() {
             const sortedAreas = Array.from(availableAreas).sort();
             
-            ["tasks", "projects", "notes"].forEach(type => {
+            ['tasks', 'projects', 'notes'].forEach(type => {
                 const select = document.getElementById(`${type}-area-filter`);
                 if (select) {
                     // Keep current selection
                     const currentValue = select.value;
                     
                     // Clear and rebuild options
-                    select.innerHTML = "<option value=\"\">All Areas</option>";
+                    select.innerHTML = '<option value="">All Areas</option>';
                     sortedAreas.forEach(area => {
                         const option = document.createElement('option');
                         option.value = area;
@@ -2858,7 +2827,7 @@ class Router {
             }
             
             // Apply sorting
-            const sortBy = document.getElementById(`${type}-sort`)?.value || "created_at_desc";
+            const sortBy = document.getElementById(`${type}-sort`)?.value || 'created_at_desc';
             data = sortData(data, sortBy);
             
             // Render filtered and sorted data
@@ -2866,22 +2835,22 @@ class Router {
         }
         
         function sortData(data, sortBy) {
-            const [field, direction] = sortBy.split("_");
-            const isAsc = direction === "asc";
+            const [field, direction] = sortBy.split('_');
+            const isAsc = direction === 'asc';
             
             return data.sort((a, b) => {
                 let aVal = a[field];
                 let bVal = b[field];
                 
                 // Handle special cases
-                if (field === "priority") {
-                    const priorityOrder = { "high": 3, "medium": 2, "low": 1 };
+                if (field === 'priority') {
+                    const priorityOrder = { high: 3, medium: 2, low: 1 };
                     aVal = priorityOrder[aVal] || 0;
                     bVal = priorityOrder[bVal] || 0;
-                } else if (field === "due_date" || field === "date_assigned" || field === "created_at" || field === "updated_at") {
+                } else if (field === 'due_date' || field === 'date_assigned' || field === 'created_at' || field === 'updated_at') {
                     aVal = aVal ? new Date(aVal) : new Date(0);
                     bVal = bVal ? new Date(bVal) : new Date(0);
-                } else if (typeof aVal === "string" && typeof bVal === "string") {
+                } else if (typeof aVal === 'string' && typeof bVal === 'string') {
                     aVal = aVal.toLowerCase();
                     bVal = bVal.toLowerCase();
                 }
@@ -2910,9 +2879,9 @@ class Router {
             elements.forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
-                    if (element.tagName === "SELECT") {
+                    if (element.tagName === 'SELECT') {
                         element.selectedIndex = 0;
-                    } else if (element.type === "date") {
+                    } else if (element.type === 'date') {
                         element.value = '';
                     }
                 }
@@ -3176,24 +3145,16 @@ class Router {
         
         function editEntity() {
             if (!currentEntity || !currentEntityType) return;
-            // TODO: Implement a proper edit form in the modal
-            alert("Edit functionality is not yet implemented. This would involve replacing the modal content with an editable form.");
+            // TODO: Implement edit functionality
+            alert("Edit functionality coming soon!");
         }
         
-        async function deleteEntity() {
+        function deleteEntity() {
             if (!currentEntity || !currentEntityType) return;
             
             if (confirm(`Are you sure you want to delete this ${currentEntityType}?`)) {
-                try {
-                    await apiCall(`/${currentEntityType}s/${currentEntity.id}`, {
-                        method: "DELETE"
-                    });
-                    alert(`${currentEntityType} deleted successfully.`);
-                    closeDetailModal();
-                    loadViewData(currentView);
-                } catch (error) {
-                    alert(`Error deleting ${currentEntityType}: ${error.message}`);
-                }
+                // TODO: Implement delete functionality
+                alert("Delete functionality coming soon!");
             }
         }
         
@@ -3272,8 +3233,7 @@ class Router {
         </div>
     </div>
 </body>
-</html>
-<?php
+</html>';
     }
 }
 

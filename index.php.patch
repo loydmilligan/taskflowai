@@ -1,0 +1,60 @@
+--- a/index.php
++++ b/index.php
+@@ -1018,8 +1018,22 @@
+             } elseif (preg_match('#^/api/scraps/(\d+)/convert/?$#', $uri, $matches)) {
+                 if ($method === 'POST') {
+                     $scrapId = $matches[1];
+-                    $data = json_decode(file_get_contents('php://input'), true);
+-                    
++
++                    $data = json_decode(file_get_contents('php://input'), true);
++                    if ($data === null) {
++                        throw new Exception('Invalid JSON input');
++                    }
++
++                    if (!isset($data['to']) || !isset($data['data'])) {
++                        throw new Exception('Missing conversion parameters');
++                    }
++
+                     if ($data['to'] === 'task') {
+                         $result = $this->scraps->convertToTask($scrapId, $data['data']);
+                     } elseif ($data['to'] === 'note') {
+@@ -1028,6 +1042,15 @@
+                         throw new Exception('Invalid conversion type');
+                     }
+                     
++                    echo json_encode($result);
++                }
++            } elseif (preg_match('#^/api/scraps/(\d+)/?$#', $uri, $matches)) {
++                $id = $matches[1];
++                if ($method === 'GET') {
++                    $scrap = $this->scraps->getById($id);
++                    echo json_encode($scrap ?: ['error' => 'Scrap not found']);
++                } elseif ($method === 'DELETE') {
++                    $result = $this->scraps->delete($id);
+                     echo json_encode($result);
+                 }
+             }
+@@ -1111,6 +1134,22 @@
+                 } else {
+                     echo json_encode(['success' => false, 'error' => 'task_id required']);
+                 }
++            } elseif ($uri === '/api/ntfy/send-due-task-reminders' && $method === 'POST') {
++                $tasks = $this->tasks->getAll();
++                $remindersSent = 0;
++                foreach ($tasks as $task) {
++                    if ($task['due_date']) {
++                        $dueDate = new DateTime($task['due_date']);
++                        $now = new DateTime();
++                        $interval = $now->diff($dueDate);
++                        if ($interval->days <= 1 && !$interval->invert) {
++                            $this->ntfy->sendTaskReminder($task);
++                            $remindersSent++;
++                        }
++                    }
++                }
++                echo json_encode(['success' => true, 'reminders_sent' => $remindersSent]);
+             }
+             
+             else {
+
