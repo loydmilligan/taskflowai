@@ -2524,8 +2524,11 @@ class Router {
             const dueDate = task.due_date ? new Date(task.due_date).toLocaleDateString() : "";
             const project = task.project_name ? `📁 ${task.project_name}` : "";
             
+            // Store task data for modal access
+            entitiesById.task[task.id] = task;
+            
             return `
-                <div class="task-item ${priorityClass} ${statusClass}" onclick="openDetailModal(${JSON.stringify(task).replace(/\"/g, '&quot;')}, \"task\")" style="cursor: pointer;">
+                <div class="task-item ${priorityClass} ${statusClass}" onclick="openDetailModal(${task.id}, 'task')" style="cursor: pointer;">
                     <div class="item-title">${task.title}</div>
                     ${task.description ? `<div style="margin: 4px 0; color: #6b7280; font-size: 14px;">${task.description}</div>` : ""}
                     <div class="item-meta">
@@ -2555,8 +2558,11 @@ class Router {
             
             let html = "";
             projects.forEach(project => {
+                // Store project data for modal access
+                entitiesById.project[project.id] = project;
+                
                 html += `
-                    <div class="project-item" onclick="openDetailModal(${JSON.stringify(project).replace(/\"/g, '&quot;')}, \"project\")" style="cursor: pointer;">
+                    <div class="project-item" onclick="openDetailModal(${project.id}, 'project')" style="cursor: pointer;">
                         <div class="item-title">${project.name}</div>
                         ${project.description ? `<div style="margin: 4px 0; color: #6b7280; font-size: 14px;">${project.description}</div>` : ""}
                         <div class="item-meta">
@@ -2586,9 +2592,12 @@ class Router {
             
             let html = "";
             notes.forEach(note => {
+                // Store note data for modal access
+                entitiesById.note[note.id] = note;
+                
                 const dateAssigned = note.date_assigned ? new Date(note.date_assigned).toLocaleDateString() : "";
                 html += `
-                    <div class="note-item" onclick="openDetailModal(${JSON.stringify(note).replace(/\"/g, '&quot;')}, \"note\")" style="cursor: pointer;">
+                    <div class="note-item" onclick="openDetailModal(${note.id}, 'note')" style="cursor: pointer;">
                         <div class="item-title">${note.title}</div>
                         <div style="margin: 8px 0; color: #374151; font-size: 14px; line-height: 1.4;">${note.content.substring(0, 200)}${note.content.length > 200 ? "..." : ""}</div>
                         <div class="item-meta">
@@ -2612,12 +2621,15 @@ class Router {
             
             let html = "";
             scraps.forEach(scrap => {
+                // Store scrap data for modal access
+                entitiesById.scrap[scrap.id] = scrap;
+                
                 const dateAssigned = scrap.date_assigned ? new Date(scrap.date_assigned).toLocaleDateString() : "";
                 const processedClass = scrap.processed ? "completed" : "";
                 const processedText = scrap.processed ? "✓ Processed" : "📝 Raw";
                 
                 html += `
-                    <div class="scrap-item ${processedClass}" onclick="openDetailModal(${JSON.stringify(scrap).replace(/\"/g, '&quot;')}, \"scrap\")" style="cursor: pointer;">
+                    <div class="scrap-item ${processedClass}" onclick="openDetailModal(${scrap.id}, 'scrap')" style="cursor: pointer;">
                         <div style="margin-bottom: 8px; color: #374151; font-size: 14px; line-height: 1.4;">${scrap.content}</div>
                         <div class="item-meta">
                             <span class="status ${processedClass}">${processedText}</span>
@@ -2777,7 +2789,16 @@ class Router {
         let allTasks = [];
         let allProjects = [];
         let allNotes = [];
+        let allScraps = [];
         let availableAreas = new Set();
+        
+        // Store entities by ID for modal access
+        let entitiesById = {
+            task: {},
+            project: {},
+            note: {},
+            scrap: {}
+        };
         
         function collectAreas(data) {
             data.forEach(item => {
@@ -2926,7 +2947,14 @@ class Router {
         let currentEntity = null;
         let currentEntityType = null;
         
-        function openDetailModal(entity, type) {
+        function openDetailModal(entityId, type) {
+            // Get entity from stored data
+            const entity = entitiesById[type][entityId];
+            if (!entity) {
+                console.error('Entity not found:', entityId, type);
+                return;
+            }
+            
             currentEntity = entity;
             currentEntityType = type;
             
