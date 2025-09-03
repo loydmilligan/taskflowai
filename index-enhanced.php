@@ -20,31 +20,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// Include AI-Guided Workflow Integration
-require_once __DIR__ . '/src/integration-layer.php';
-
-// Continue with existing index.php content and add workflow integration
-// This serves as the enhanced entry point with workflow features
-
 // Check if this is a workflow API request
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Initialize feature integrator
-$featureIntegrator = new TaskFlowFeatureIntegrator(Database::getInstance());
+// For workflow API requests, we need special handling
+$isWorkflowRequest = (
+    strpos($uri, '/api/workflow') === 0 || 
+    strpos($uri, '/api/chat') === 0 || 
+    strpos($uri, '/api/integration') === 0 || 
+    strpos($uri, '/api/projects') === 0 ||
+    strpos($uri, '/manifest.json') === 0 ||
+    strpos($uri, '/sw.js') === 0
+);
 
-// Handle workflow requests through feature integrator
-$workflowResponse = $featureIntegrator->handleRequest($method, $uri, 
-    $method === 'POST' ? json_decode(file_get_contents('php://input'), true) : $_GET);
-
-if ($workflowResponse !== null) {
-    header('Content-Type: application/json');
-    echo json_encode($workflowResponse);
-    exit;
+if ($isWorkflowRequest) {
+    // Set a flag that the main index.php can detect
+    define('WORKFLOW_REQUEST', true);
 }
 
-// Continue with existing index.php logic for non-workflow requests
-// Include the main index.php content here or redirect to it
+// Always load the main index.php first to get core classes
 require_once __DIR__ . '/index.php';
+
+// If this was a workflow request and it wasn't handled by main index,
+// the workflow integrator will be initialized by the main index.php
 
 ?>
