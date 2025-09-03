@@ -40,7 +40,7 @@ if ($isWorkflowRequest) {
 }
 
 // Always load the main index.php first to get core classes
-require_once __DIR__ . '/index.php';
+require_once __DIR__ . '/index-original.php';
 
 // If this was a workflow request and it wasn't handled by main index,
 // the workflow integrator will be initialized by the main index.php
