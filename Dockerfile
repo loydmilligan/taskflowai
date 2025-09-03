@@ -16,6 +16,7 @@ WORKDIR /var/www/html
 
 # Copy application files
 COPY index.php .
+COPY index-original.php .
 COPY .htaccess .
 COPY CLAUDE.md .
 COPY README.md .
