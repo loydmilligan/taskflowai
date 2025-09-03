@@ -20,6 +20,16 @@ COPY .htaccess .
 COPY CLAUDE.md .
 COPY README.md .
 
+# Copy new roadmap features
+COPY src/ ./src/
+COPY tests/ ./tests/
+COPY mobile/ ./mobile/
+COPY scripts/ ./scripts/
+
+# Copy additional files
+COPY package*.json ./
+COPY playwright.config.* ./
+
 # Create uploads directory for future file attachments
 RUN mkdir -p uploads && chown -R www-data:www-data uploads
 
