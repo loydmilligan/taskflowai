@@ -4,6 +4,12 @@
  * Extends existing GeminiAI class with workflow-aware capabilities
  */
 
+// Ensure GeminiAI class is loaded before extending
+if (!class_exists('GeminiAI')) {
+    // Skip workflow integration if base class not available
+    return;
+}
+
 class WorkflowAwareGeminiAI extends GeminiAI {
     private $workflowSystem;
     

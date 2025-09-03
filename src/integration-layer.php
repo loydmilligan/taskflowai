@@ -11,8 +11,12 @@ require_once __DIR__ . '/features/ai-workflow.php';
 require_once __DIR__ . '/features/advanced-chat.php';
 require_once __DIR__ . '/features/mobile-pwa.php';
 require_once __DIR__ . '/features/project-filtering.php';
-require_once __DIR__ . '/features/workflow-integration.php';
 require_once __DIR__ . '/features/workflow-ui.php';
+
+// Load workflow integration only if GeminiAI class exists
+if (class_exists('GeminiAI')) {
+    require_once __DIR__ . '/features/workflow-integration.php';
+}
 
 class TaskFlowFeatureIntegrator {
     private $db;
