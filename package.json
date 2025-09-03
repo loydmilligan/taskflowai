@@ -6,7 +6,16 @@
   "main": "mcp-server.js",
   "scripts": {
     "start": "node mcp-server.js",
-    "dev": "node --watch mcp-server.js"
+    "dev": "node --watch mcp-server.js",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:mobile": "playwright test --project=Mobile",
+    "test:cross-browser": "playwright test --project=chromium --project=firefox --project=webkit",
+    "test:coverage": "playwright test --reporter=html",
+    "playwright:install": "playwright install",
+    "playwright:codegen": "playwright codegen localhost:8080"
   },
   "keywords": [
     "mcp",
@@ -17,6 +26,12 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^20.0.0",
+    "playwright": "^1.55.0",
+    "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0"

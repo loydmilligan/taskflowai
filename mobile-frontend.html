@@ -720,7 +720,7 @@
         </button>
     </div>
 
-    <!-- Chat Interface Overlay -->
+    <!-- Advanced Chat Interface Overlay -->
     <div id="chat" class="chat-container">
         <div class="chat-header">
             <button class="chat-close" onclick="toggleChat()">
@@ -729,23 +729,79 @@
                 </svg>
             </button>
             <h2 class="chat-title">AI Assistant</h2>
+            <div class="chat-actions">
+                <button id="search-button" class="chat-action" title="Search History">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </button>
+                <button id="shortcut-button" class="chat-action" title="Quick Shortcuts">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z"/>
+                    </svg>
+                </button>
+            </div>
         </div>
+        
+        <!-- Voice Indicator -->
+        <div id="voice-indicator" class="voice-indicator">
+            🎤 Listening...
+        </div>
+        
+        <!-- Search Panel -->
+        <div id="search-panel" class="search-panel">
+            <input 
+                id="search-input" 
+                class="search-input" 
+                placeholder="Search chat history..." 
+                oninput="advancedChat.searchHistory(this.value)"
+            />
+            <div id="search-results" class="search-results"></div>
+        </div>
+        
+        <!-- Shortcut Panel -->
+        <div id="shortcut-panel" class="shortcut-panel"></div>
         
         <div id="chat-messages" class="chat-messages">
             <div class="message ai">
-                <p>Hi! I'm your TaskFlow AI assistant. I can help you manage tasks, create projects, organize notes, and plan your day. What would you like to work on?</p>
+                <p>Hi! I'm your TaskFlow AI assistant. I can help you manage tasks, create projects, organize notes, and plan your day.</p>
+                <p><strong>Try voice commands:</strong> Say "new task", "search history", or "show shortcuts"</p>
+                <p><strong>Use shortcuts:</strong> Type //t for tasks, //n for notes, //p for projects</p>
             </div>
         </div>
         
         <div class="chat-input-container">
-            <textarea 
-                id="chat-input" 
-                class="chat-input" 
-                placeholder="Type your message..." 
-                rows="1"
-                maxlength="500"
-            ></textarea>
-            <button id="chat-send" class="chat-send" onclick="sendMessage()">
+            <!-- Voice Preview -->
+            <div id="voice-preview" class="voice-preview"></div>
+            
+            <!-- Smart Suggestions -->
+            <div id="suggestions-container" class="suggestions-container"></div>
+            
+            <!-- Shortcut Preview -->
+            <div id="shortcut-preview" class="shortcut-preview"></div>
+            
+            <div class="chat-input-wrapper">
+                <textarea 
+                    id="chat-input" 
+                    class="chat-input" 
+                    placeholder="Type your message or use voice..." 
+                    rows="1"
+                    maxlength="1000"
+                    autocomplete="off"
+                    spellcheck="true"
+                ></textarea>
+            </div>
+            
+            <div class="chat-input-actions">
+                <button id="voice-button" class="chat-input-btn" title="Voice Input">
+                    🎤
+                </button>
+                <button id="attachment-button" class="chat-input-btn" title="Attach File" style="display: none;">
+                    📎
+                </button>
+            </div>
+            
+            <button id="chat-send" class="chat-send" disabled>
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                 </svg>
@@ -753,6 +809,13 @@
         </div>
     </div>
 
+    <!-- Include Advanced Chat CSS -->
+    <link rel="stylesheet" href="/src/css/advanced-chat.css">
+    
+    <!-- Include Advanced Chat JavaScript -->
+    <script src="/src/js/advanced-chat.js"></script>
+    <script src="/src/js/mobile-enhancements.js"></script>
+    
     <script>
         // Application State
         const AppState = {
@@ -904,6 +967,12 @@
         }
 
         async function sendMessage() {
+            // Use the advanced chat interface if available
+            if (window.advancedChat) {
+                return window.advancedChat.sendMessage();
+            }
+            
+            // Fallback to basic implementation
             const input = document.getElementById('chat-input');
             const message = input.value.trim();
             

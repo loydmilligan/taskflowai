@@ -1,250 +1,332 @@
-# CLAUDE.md - TaskFlow AI Project
+# Claude Code Configuration - SPARC Development Environment
+
+## 🚨 CRITICAL: CONCURRENT EXECUTION & FILE MANAGEMENT
+
+**ABSOLUTE RULES**:
+1. ALL operations MUST be concurrent/parallel in a single message
+2. **NEVER save working files, text/mds and tests to the root folder**
+3. ALWAYS organize files in appropriate subdirectories
+4. **USE CLAUDE CODE'S TASK TOOL** for spawning agents concurrently, not just MCP
+
+### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
+
+**MANDATORY PATTERNS:**
+- **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
+- **Task tool (Claude Code)**: ALWAYS spawn ALL agents in ONE message with full instructions
+- **File operations**: ALWAYS batch ALL reads/writes/edits in ONE message
+- **Bash commands**: ALWAYS batch ALL terminal operations in ONE message
+- **Memory operations**: ALWAYS batch ALL memory store/retrieve in ONE message
+
+### 🎯 CRITICAL: Claude Code Task Tool for Agent Execution
+
+**Claude Code's Task tool is the PRIMARY way to spawn agents:**
+```javascript
+// ✅ CORRECT: Use Claude Code's Task tool for parallel agent execution
+[Single Message]:
+  Task("Research agent", "Analyze requirements and patterns...", "researcher")
+  Task("Coder agent", "Implement core features...", "coder")
+  Task("Tester agent", "Create comprehensive tests...", "tester")
+  Task("Reviewer agent", "Review code quality...", "reviewer")
+  Task("Architect agent", "Design system architecture...", "system-architect")
+```
+
+**MCP tools are ONLY for coordination setup:**
+- `mcp__claude-flow__swarm_init` - Initialize coordination topology
+- `mcp__claude-flow__agent_spawn` - Define agent types for coordination
+- `mcp__claude-flow__task_orchestrate` - Orchestrate high-level workflows
+
+### 📁 File Organization Rules
+
+**NEVER save to root folder. Use these directories:**
+- `/src` - Source code files
+- `/tests` - Test files
+- `/docs` - Documentation and markdown files
+- `/config` - Configuration files
+- `/scripts` - Utility scripts
+- `/examples` - Example code
 
 ## Project Overview
-TaskFlow AI is a mobile-first project and task management web app where users interact primarily through an AI chat interface powered by Google Gemini. The core philosophy is that all entity management (creating, editing, organizing) happens through natural language conversation rather than traditional forms.
 
-## Project-Specific Context
-This is a single-user productivity app built with extreme simplicity in mind:
-- **Primary Interface**: AI chat using Google Gemini API
-- **Architecture**: Single PHP file with SQLite database
-- **Mobile Priority**: Touch-first design with chat as primary input method
-- **Entity Model**: Projects, Tasks, Notes, and Scraps with smart conversion workflows
+This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology with Claude-Flow orchestration for systematic Test-Driven Development.
 
-## Key Technical Decisions
+## SPARC Commands
 
-### Architecture Choice
-- **Single File Design**: `index.php` handles all routing, database operations, and API endpoints
-- **No Frameworks**: Vanilla PHP, JavaScript, and CSS only
-- **SQLite Database**: Zero-configuration, portable data storage
-- **Mobile-First CSS**: Progressive enhancement from mobile to desktop
+### Core Commands
+- `npx claude-flow sparc modes` - List available modes
+- `npx claude-flow sparc run <mode> "<task>"` - Execute specific mode
+- `npx claude-flow sparc tdd "<feature>"` - Run complete TDD workflow
+- `npx claude-flow sparc info <mode>` - Get mode details
 
-### API-First Design
-Every user action has a corresponding REST endpoint:
-- Authentication via API keys for external integrations
-- Full CRUD operations accessible programmatically
-- Chat interface internally uses same API endpoints as external clients
+### Batchtools Commands
+- `npx claude-flow sparc batch <modes> "<task>"` - Parallel execution
+- `npx claude-flow sparc pipeline "<task>"` - Full pipeline processing
+- `npx claude-flow sparc concurrent <mode> "<tasks-file>"` - Multi-task processing
 
-### Chat-Driven Interaction Model
-- **Primary Input**: Natural language through Gemini AI chat
-- **Persistent Context**: Chat history maintained across sessions
-- **Navigation**: AI can navigate between views and perform actions
-- **Entity Management**: Create/edit entities through conversational interface
+### Build Commands
+- `npm run build` - Build project
+- `npm run test` - Run tests
+- `npm run lint` - Linting
+- `npm run typecheck` - Type checking
 
-## Current Project Status
+## SPARC Workflow Phases
 
-### Development Phases
-1. **Phase 1 - Research & Planning**: ✅ Complete
-   - Core concept validated
-   - Technical stack selected
-   - Entity relationships defined
+1. **Specification** - Requirements analysis (`sparc run spec-pseudocode`)
+2. **Pseudocode** - Algorithm design (`sparc run spec-pseudocode`)
+3. **Architecture** - System design (`sparc run architect`)
+4. **Refinement** - TDD implementation (`sparc tdd`)
+5. **Completion** - Integration (`sparc run integration`)
 
-2. **Phase 2 - Design & Architecture**: 🔄 Ready to Begin
-   - Mobile-first UI wireframes needed
-   - Chat interface design patterns
-   - API endpoint structure design
+## Code Style & Best Practices
 
-3. **Phase 3 - Frontend Implementation**: ⏳ Planned
-   - Mobile-responsive chat interface
-   - View switching and navigation
-   - Touch-optimized interactions
+- **Modular Design**: Files under 500 lines
+- **Environment Safety**: Never hardcode secrets
+- **Test-First**: Write tests before implementation
+- **Clean Architecture**: Separate concerns
+- **Documentation**: Keep updated
 
-4. **Phase 4 - Backend & Integration**: ⏳ Planned
-   - Google Gemini API integration
-   - SQLite schema and operations
-   - ntfy.sh notification system
+## 🚀 Available Agents (54 Total)
 
-## File Structure
-```
-taskflow-ai/
-├── index.php          # Single-file app with routing, API, and views
-├── taskflow.db        # SQLite database (auto-created)
-├── uploads/           # File attachments (future feature)
-├── CLAUDE.md          # This file
-└── README.md          # Project documentation
-```
+### Core Development
+`coder`, `reviewer`, `tester`, `planner`, `researcher`
 
-## Core Entities & Relationships
+### Swarm Coordination
+`hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`, `collective-intelligence-coordinator`, `swarm-memory-manager`
 
-### Entity Types
-- **Projects**: Containers with kanban/card views
-- **Tasks**: Actionable items with due dates and priorities
-- **Notes**: Reference material without due dates
-- **Scraps**: Raw input that converts to Tasks or Notes
+### Consensus & Distributed
+`byzantine-coordinator`, `raft-manager`, `gossip-coordinator`, `consensus-builder`, `crdt-synchronizer`, `quorum-manager`, `security-manager`
 
-### Smart Conversion Logic
-- **Scrap → Task**: Add due date and priority
-- **Scrap → Note**: Keep as reference, optionally date-assign for planning
-- **Morning Workflow**: Daily prompt to process unprocessed Scraps
+### Performance & Optimization
+`perf-analyzer`, `performance-benchmarker`, `task-orchestrator`, `memory-coordinator`, `smart-agent`
 
-## Mobile-First Design Principles
+### GitHub & Repository
+`github-modes`, `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`, `workflow-automation`, `project-board-sync`, `repo-architect`, `multi-repo-swarm`
 
-### Touch Optimization
-- Large tap targets (minimum 44px)
-- Swipe gestures for navigation
-- Bottom-sheet modals for mobile comfort
-- Thumb-friendly action placement
+### SPARC Methodology
+`sparc-coord`, `sparc-coder`, `specification`, `pseudocode`, `architecture`, `refinement`
 
-### Chat Interface Design
-- Fixed bottom chat input
-- Auto-expanding text area
-- Quick action buttons for common tasks
-- Voice input placeholder (future feature)
+### Specialized Development
+`backend-dev`, `mobile-dev`, `ml-developer`, `cicd-engineer`, `api-docs`, `system-architect`, `code-analyzer`, `base-template-generator`
 
-## AI Integration Architecture
+### Testing & Validation
+`tdd-london-swarm`, `production-validator`
 
-### Google Gemini Setup
-- API key stored in settings table
-- Chat context maintained for conversation continuity
-- Structured prompts for entity creation/modification
-- Error handling for API failures with graceful degradation
+### Migration & Planning
+`migration-planner`, `swarm-init`
 
-### Chat Processing Flow
-1. User input received
-2. Context from chat history added
-3. Gemini API called with structured prompt
-4. Response parsed for actions (create, edit, navigate)
-5. Database updated if needed
-6. UI updated with results
-7. Chat history stored
+## 🎯 Claude Code vs MCP Tools
 
-## API Design Patterns
+### Claude Code Handles ALL EXECUTION:
+- **Task tool**: Spawn and run agents concurrently for actual work
+- File operations (Read, Write, Edit, MultiEdit, Glob, Grep)
+- Code generation and programming
+- Bash commands and system operations
+- Implementation work
+- Project navigation and analysis
+- TodoWrite and task management
+- Git operations
+- Package management
+- Testing and debugging
 
-### REST Endpoints
-```
-GET    /api/projects              # List all projects
-POST   /api/projects              # Create project
-GET    /api/projects/{id}         # Get project details
-PUT    /api/projects/{id}         # Update project
-DELETE /api/projects/{id}         # Delete project
+### MCP Tools ONLY COORDINATE:
+- Swarm initialization (topology setup)
+- Agent type definitions (coordination patterns)
+- Task orchestration (high-level planning)
+- Memory management
+- Neural features
+- Performance tracking
+- GitHub integration
 
-GET    /api/tasks                 # List tasks (with filters)
-POST   /api/tasks                 # Create task
-GET    /api/tasks/{id}            # Get task details
-PUT    /api/tasks/{id}            # Update task
-DELETE /api/tasks/{id}            # Delete task
+**KEY**: MCP coordinates the strategy, Claude Code's Task tool executes with real agents.
 
-POST   /api/chat                  # Send chat message
-GET    /api/chat/history          # Get chat history
+## 🚀 Quick Setup
 
-GET    /api/plan                  # Get today's plan
-GET    /api/plan/{date}           # Get plan for specific date
-
-POST   /api/scraps/{id}/convert   # Convert scrap to task/note
+```bash
+# Add Claude Flow MCP server
+claude mcp add claude-flow npx claude-flow@alpha mcp start
 ```
 
-### Authentication
-- API key based authentication
-- Keys generated and managed in settings
-- Header: `Authorization: Bearer {api_key}`
+## MCP Tool Categories
 
-## Database Schema Design
+### Coordination
+`swarm_init`, `agent_spawn`, `task_orchestrate`
 
-### Key Tables
-```sql
--- Core entities
-projects (id, name, description, status, created_at, tags, area)
-tasks (id, project_id, title, description, due_date, priority, status, tags, area, created_at)
-notes (id, title, content, date_assigned, date_range_end, tags, area, created_at)
-scraps (id, content, date_assigned, date_range_end, processed, created_at)
+### Monitoring
+`swarm_status`, `agent_list`, `agent_metrics`, `task_status`, `task_results`
 
--- System tables
-chat_history (id, message, response, timestamp, context)
-settings (key, value)
-api_keys (id, key_hash, name, created_at, last_used)
+### Memory & Neural
+`memory_usage`, `neural_status`, `neural_train`, `neural_patterns`
+
+### GitHub Integration
+`github_swarm`, `repo_analyze`, `pr_enhance`, `issue_triage`, `code_review`
+
+### System
+`benchmark_run`, `features_detect`, `swarm_monitor`
+
+## 🚀 Agent Execution Flow with Claude Code
+
+### The Correct Pattern:
+
+1. **Optional**: Use MCP tools to set up coordination topology
+2. **REQUIRED**: Use Claude Code's Task tool to spawn agents that do actual work
+3. **REQUIRED**: Each agent runs hooks for coordination
+4. **REQUIRED**: Batch all operations in single messages
+
+### Example Full-Stack Development:
+
+```javascript
+// Single message with all agent spawning via Claude Code's Task tool
+[Parallel Agent Execution]:
+  Task("Backend Developer", "Build REST API with Express. Use hooks for coordination.", "backend-dev")
+  Task("Frontend Developer", "Create React UI. Coordinate with backend via memory.", "coder")
+  Task("Database Architect", "Design PostgreSQL schema. Store schema in memory.", "code-analyzer")
+  Task("Test Engineer", "Write Jest tests. Check memory for API contracts.", "tester")
+  Task("DevOps Engineer", "Setup Docker and CI/CD. Document in memory.", "cicd-engineer")
+  Task("Security Auditor", "Review authentication. Report findings via hooks.", "reviewer")
+  
+  // All todos batched together
+  TodoWrite { todos: [...8-10 todos...] }
+  
+  // All file operations together
+  Write "backend/server.js"
+  Write "frontend/App.jsx"
+  Write "database/schema.sql"
 ```
 
-### Indexing Strategy
-- Date-based queries (due_date, date_assigned)
-- Tag and area filtering
-- Text search on content fields
+## 📋 Agent Coordination Protocol
 
-## Development Standards
+### Every Agent Spawned via Task Tool MUST:
 
-### Code Quality
-- **Single Responsibility**: Each function has one clear purpose
-- **API Consistency**: All endpoints follow REST conventions
-- **Error Handling**: Graceful degradation for AI and network failures
-- **Mobile Testing**: Test on actual mobile devices, not just browser dev tools
+**1️⃣ BEFORE Work:**
+```bash
+npx claude-flow@alpha hooks pre-task --description "[task]"
+npx claude-flow@alpha hooks session-restore --session-id "swarm-[id]"
+```
 
-### Performance Targets
-- **Initial Load**: < 2 seconds on 3G mobile
-- **Chat Response**: < 3 seconds for Gemini API calls
-- **Navigation**: Instant view switching
-- **Database**: < 100ms for local SQLite queries
+**2️⃣ DURING Work:**
+```bash
+npx claude-flow@alpha hooks post-edit --file "[file]" --memory-key "swarm/[agent]/[step]"
+npx claude-flow@alpha hooks notify --message "[what was done]"
+```
 
-### Security Considerations
-- **Input Sanitization**: All user input cleaned before database storage
-- **API Authentication**: Required for all endpoints
-- **SQL Injection**: Use prepared statements exclusively
-- **XSS Prevention**: Escape all output, especially chat content
+**3️⃣ AFTER Work:**
+```bash
+npx claude-flow@alpha hooks post-task --task-id "[task]"
+npx claude-flow@alpha hooks session-end --export-metrics true
+```
 
-## Integration Points
+## 🎯 Concurrent Execution Examples
 
-### Google Gemini AI
-- **Prompt Engineering**: Structured prompts for consistent entity creation
-- **Context Management**: Include relevant project/task context in API calls
-- **Fallback Strategy**: Basic functionality works without AI if API fails
+### ✅ CORRECT WORKFLOW: MCP Coordinates, Claude Code Executes
 
-### ntfy.sh Notifications
-- **Morning Reminders**: Process scraps before configured time
-- **Due Date Alerts**: Task deadlines and overdue notifications
-- **Configuration**: User sets topic and notification preferences
+```javascript
+// Step 1: MCP tools set up coordination (optional, for complex tasks)
+[Single Message - Coordination Setup]:
+  mcp__claude-flow__swarm_init { topology: "mesh", maxAgents: 6 }
+  mcp__claude-flow__agent_spawn { type: "researcher" }
+  mcp__claude-flow__agent_spawn { type: "coder" }
+  mcp__claude-flow__agent_spawn { type: "tester" }
 
-## Mobile UX Patterns
+// Step 2: Claude Code Task tool spawns ACTUAL agents that do the work
+[Single Message - Parallel Agent Execution]:
+  // Claude Code's Task tool spawns real agents concurrently
+  Task("Research agent", "Analyze API requirements and best practices. Check memory for prior decisions.", "researcher")
+  Task("Coder agent", "Implement REST endpoints with authentication. Coordinate via hooks.", "coder")
+  Task("Database agent", "Design and implement database schema. Store decisions in memory.", "code-analyzer")
+  Task("Tester agent", "Create comprehensive test suite with 90% coverage.", "tester")
+  Task("Reviewer agent", "Review code quality and security. Document findings.", "reviewer")
+  
+  // Batch ALL todos in ONE call
+  TodoWrite { todos: [
+    {id: "1", content: "Research API patterns", status: "in_progress", priority: "high"},
+    {id: "2", content: "Design database schema", status: "in_progress", priority: "high"},
+    {id: "3", content: "Implement authentication", status: "pending", priority: "high"},
+    {id: "4", content: "Build REST endpoints", status: "pending", priority: "high"},
+    {id: "5", content: "Write unit tests", status: "pending", priority: "medium"},
+    {id: "6", content: "Integration tests", status: "pending", priority: "medium"},
+    {id: "7", content: "API documentation", status: "pending", priority: "low"},
+    {id: "8", content: "Performance optimization", status: "pending", priority: "low"}
+  ]}
+  
+  // Parallel file operations
+  Bash "mkdir -p app/{src,tests,docs,config}"
+  Write "app/package.json"
+  Write "app/src/server.js"
+  Write "app/tests/server.test.js"
+  Write "app/docs/API.md"
+```
 
-### Navigation
-- **Bottom Tab Bar**: Primary navigation for main views
-- **Chat Overlay**: Accessible from all screens via floating action button
-- **Swipe Gestures**: Back navigation and view switching
-- **Pull-to-Refresh**: Update data in list views
+### ❌ WRONG (Multiple Messages):
+```javascript
+Message 1: mcp__claude-flow__swarm_init
+Message 2: Task("agent 1")
+Message 3: TodoWrite { todos: [single todo] }
+Message 4: Write "file.js"
+// This breaks parallel coordination!
+```
 
-### Input Methods
-- **Chat Primary**: Natural language for all entity management
-- **Quick Actions**: Common operations as chat shortcuts
-- **Touch Fallback**: Basic tap interactions for navigation
-- **Voice Future**: Prepared for voice input integration
+## Performance Benefits
 
-## Development Workflow
+- **84.8% SWE-Bench solve rate**
+- **32.3% token reduction**
+- **2.8-4.4x speed improvement**
+- **27+ neural models**
 
-### Phase-Based Development
-Each phase should result in a working, demonstrable feature:
-- **Research**: Understand requirements and validate approaches
-- **Design**: Create working prototypes of key interactions
-- **Frontend**: Build complete user interface with mock data
-- **Backend**: Integrate real data and AI functionality
+## Hooks Integration
 
-### Testing Strategy
-- **Mobile Testing**: Primary testing on mobile devices
-- **Chat Testing**: Validate AI responses for common scenarios
-- **API Testing**: Ensure all endpoints work correctly
-- **Edge Cases**: Handle offline scenarios and API failures
+### Pre-Operation
+- Auto-assign agents by file type
+- Validate commands for safety
+- Prepare resources automatically
+- Optimize topology by complexity
+- Cache searches
 
-## Success Metrics
+### Post-Operation
+- Auto-format code
+- Train neural patterns
+- Update memory
+- Analyze performance
+- Track token usage
 
-### User Experience
-- **Chat Success Rate**: >90% of user intents correctly interpreted
-- **Mobile Performance**: Smooth interactions on mid-range phones
-- **Daily Usage**: Users complete morning scrap processing workflow
+### Session Management
+- Generate summaries
+- Persist state
+- Track metrics
+- Restore context
+- Export workflows
 
-### Technical Performance
-- **Uptime**: Local app always available (no external dependencies for core features)
-- **Response Time**: Chat interactions feel responsive
-- **Data Integrity**: No data loss during entity conversions
+## Advanced Features (v2.0.0)
 
-## Future Considerations
+- 🚀 Automatic Topology Selection
+- ⚡ Parallel Execution (2.8-4.4x speed)
+- 🧠 Neural Training
+- 📊 Bottleneck Analysis
+- 🤖 Smart Auto-Spawning
+- 🛡️ Self-Healing Workflows
+- 💾 Cross-Session Memory
+- 🔗 GitHub Integration
 
-### Planned Enhancements
-- **Voice Input**: Speech-to-text for chat interface
-- **File Attachments**: Associate files with projects/tasks
-- **Collaboration**: Multi-user support (major architecture change)
-- **Advanced AI**: More sophisticated natural language processing
+## Integration Tips
 
-### Technical Debt Prevention
-- **Keep Simple**: Resist feature creep that breaks single-file architecture
-- **API First**: All features must work via API for future flexibility
-- **Mobile Priority**: Never sacrifice mobile experience for desktop features
+1. Start with basic swarm init
+2. Scale agents gradually
+3. Use memory for context
+4. Monitor progress regularly
+5. Train patterns from success
+6. Enable hooks automation
+7. Use GitHub tools first
 
-## Remember
-This project prioritizes **working over perfect**. The goal is a functional productivity tool that proves the chat-driven interaction model, not a feature-complete enterprise solution. Focus on the core workflow: talk to AI, manage tasks, stay organized.
+## Support
 
-The chat interface is the innovation here - keep everything else as simple as possible to support that core differentiator.
+- Documentation: https://github.com/ruvnet/claude-flow
+- Issues: https://github.com/ruvnet/claude-flow/issues
+
+---
+
+Remember: **Claude Flow coordinates, Claude Code creates!**
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+Never save working files, text/mds and tests to the root folder.
