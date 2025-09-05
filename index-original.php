@@ -1109,9 +1109,14 @@ class Router {
     private $settings;
     private $gemini;
     private $ntfy;
+    private $db;
+    private $enhancedAI;
     
     public function __construct() {
         Auth::init();
+        
+        // Initialize database first
+        $this->db = Database::getInstance();
         
         $this->projects = new ProjectManager();
         $this->tasks = new TaskManager();
@@ -1120,6 +1125,9 @@ class Router {
         $this->settings = new SettingsManager();
         $this->gemini = new GeminiAI();
         $this->ntfy = new NtfyManager();
+        
+        // Initialize enhanced AI with conversation memory
+        $this->enhancedAI = new EnhancedWorkflowAI($this->db->getPdo(), $this->gemini);
     }
     
     public function handleRequest() {
@@ -1258,26 +1266,12 @@ class Router {
             elseif ($uri === '/api/chat' && $method === 'POST') {
                 $data = json_decode(file_get_contents('php://input'), true);
                 $message = $data['message'] ?? '';
+                $sessionId = $data['session_id'] ?? null;
                 
-                // Build context for AI
-                $context = [
-                    'recent_tasks' => $this->tasks->getAll(['limit' => 5]),
-                    'projects' => $this->projects->getAll(['status' => 'active']),
-                    'unprocessed_scraps' => $this->scraps->getUnprocessed()
-                ];
+                // Use enhanced AI system with conversation memory
+                $response = $this->enhancedAI->chat($message, $sessionId);
                 
-                $response = $this->gemini->chat($message, $context);
-                
-                // Process any actions returned by AI
-                if ($response['success'] && !empty($response['actions'])) {
-                    $actionResults = [];
-                    foreach ($response['actions'] as $action) {
-                        $actionResults[] = $this->processAction($action);
-                    }
-                    $response['action_results'] = $actionResults;
-                }
-                
-                echo json_encode($response);
+                echo json_encode(['success' => true, 'message' => $response]);
             }
             
             // Chat history endpoint
