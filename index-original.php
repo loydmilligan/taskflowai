@@ -14,6 +14,11 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
+
+// Load new AI and workflow features
+require_once __DIR__ . '/src/features/enhanced-ai-conversation.php';
+require_once __DIR__ . '/src/features/proactive-workflows.php';
+
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
