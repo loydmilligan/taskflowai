@@ -12,6 +12,10 @@ require_once __DIR__ . '/features/advanced-chat.php';
 require_once __DIR__ . '/features/mobile-pwa.php';
 require_once __DIR__ . '/features/project-filtering.php';
 require_once __DIR__ . '/features/workflow-ui.php';
+require_once __DIR__ . '/features/proactive-workflows.php';
+require_once __DIR__ . '/features/enhanced-ai-conversation.php';
+require_once __DIR__ . '/features/workflow-settings-ui.php';
+require_once __DIR__ . '/features/workflow-scheduler.php';
 
 // Load workflow integration only if GeminiAI class exists
 if (class_exists('GeminiAI')) {
@@ -30,11 +34,13 @@ class TaskFlowFeatureIntegrator {
     private $chatRoutes;
     private $pwaRoutes;
     private $filteringRoutes;
+    private $settingsRoutes;
+    private $scheduler;
     
     // Workflow-aware components
     private $workflowGemini;
     
-    public function __construct($database) {
+    public function __construct($database, $geminiAI = null, $ntfyManager = null) {
         $this->db = $database;
         
         // Initialize feature systems
@@ -43,11 +49,19 @@ class TaskFlowFeatureIntegrator {
         $this->mobilePWA = new MobilePWAManager($database);
         $this->projectFiltering = new ProjectFilteringSystem($database);
         
+        // Initialize enhanced features
+        $this->proactiveWorkflows = new ProactiveWorkflowManager($database, $ntfyManager, $this->aiWorkflow);
+        $this->enhancedChat = new EnhancedChatRoutes($database, $geminiAI);
+        $this->settingsUI = new WorkflowSettingsUI($database, $this->proactiveWorkflows);
+        $this->scheduler = new WorkflowScheduler($database, $this->proactiveWorkflows);
+        
         // Initialize route handlers
         $this->workflowRoutes = new WorkflowRoutes($this->aiWorkflow);
         $this->chatRoutes = new AdvancedChatRoutes($this->advancedChat);
         $this->pwaRoutes = new PWARoutes($this->mobilePWA);
         $this->filteringRoutes = new ProjectFilteringRoutes($this->projectFiltering);
+        $this->proactiveRoutes = new ProactiveWorkflowRoutes($this->proactiveWorkflows);
+        $this->settingsRoutes = new WorkflowSettingsRoutes($this->settingsUI);
     }
     
     /**
@@ -77,6 +91,24 @@ class TaskFlowFeatureIntegrator {
             strpos($endpoint, '/api/filter-options') === 0 ||
             strpos($endpoint, '/api/bulk-assign') === 0) {
             return $this->filteringRoutes->handleRequest($method, $endpoint, $data);
+        }
+        
+        // Proactive workflow endpoints
+        if (strpos($endpoint, '/api/proactive') === 0 || 
+            strpos($endpoint, '/api/workflow-action') === 0) {
+            return $this->proactiveRoutes->handleRequest($method, $endpoint, $data);
+        }
+        
+        // Enhanced chat endpoints
+        if (strpos($endpoint, '/api/enhanced-chat') === 0 || 
+            strpos($endpoint, '/api/conversation') === 0 ||
+            strpos($endpoint, '/api/todays-plan') === 0) {
+            return $this->enhancedChat->handleRequest($method, $endpoint, $data);
+        }
+        
+        // Workflow settings endpoints
+        if (strpos($endpoint, '/api/workflow-settings') === 0) {
+            return $this->settingsRoutes->handleRequest($method, $endpoint, $data);
         }
         
         // Feature integration endpoints
@@ -375,16 +407,18 @@ class TaskFlowFeatureIntegrator {
             'advanced_chat' => $this->testFeature('chat'),
             'mobile_pwa' => $this->testFeature('pwa'),
             'project_filtering' => $this->testFeature('filtering'),
+            'proactive_workflows' => $this->testFeature('proactive'),
+            'enhanced_chat' => $this->testFeature('enhanced_chat'),
             'integration_layer' => 'healthy',
             'overall_health' => 'healthy'
         ];
         
         // Determine overall health
         $healthyCount = count(array_filter($status, fn($s) => $s === 'healthy'));
-        if ($healthyCount < 4) {
+        if ($healthyCount < 5) {
             $status['overall_health'] = 'degraded';
         }
-        if ($healthyCount < 2) {
+        if ($healthyCount < 3) {
             $status['overall_health'] = 'unhealthy';
         }
         
@@ -412,6 +446,16 @@ class TaskFlowFeatureIntegrator {
                     
                 case 'filtering':
                     $this->projectFiltering->getProjectSummaries(['limit' => 1]);
+                    return 'healthy';
+                    
+                case 'proactive':
+                    // Test proactive workflow system
+                    $this->proactiveWorkflows->getWorkflowSchedules();
+                    return 'healthy';
+                    
+                case 'enhanced_chat':
+                    // Test enhanced chat system
+                    $this->enhancedChat->getConversationMemory()->getActiveSession();
                     return 'healthy';
             }
         } catch (Exception $e) {
@@ -485,6 +529,22 @@ class TaskFlowFeatureIntegrator {
                 'cross_entity' => true,
                 'unassigned_view' => true,
                 'bulk_operations' => true
+            ],
+            'proactive_workflows' => [
+                'enabled' => true,
+                'morning_notifications' => true,
+                'evening_notifications' => true,
+                'snooze_options' => [15, 30, 60],
+                'ntfy_integration' => true,
+                'interactive_buttons' => true
+            ],
+            'enhanced_chat' => [
+                'enabled' => true,
+                'conversation_memory' => true,
+                'multi_turn_sessions' => true,
+                'todays_plan_integration' => true,
+                'action_parsing' => true,
+                'context_preservation' => true
             ],
             'integration' => [
                 'unified_search' => true,
